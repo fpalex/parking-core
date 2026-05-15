@@ -1,0 +1,30 @@
+services:
+  parking-database:
+    image: mysql:8.0
+    platform: linux/amd64
+    container_name: parking-database
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: parking
+    ports:
+      - "3306:3306"
+    volumes:
+      - parking-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  simulator:
+    image: cfontes0estapar/garage-sim:1.0.0
+    platform: linux/amd64
+    container_name: garage-simulator
+    ports:
+      - "3000:3000"
+    depends_on:
+      parking-database:
+        condition: service_healthy
+
+volumes:
+  parking-data:
